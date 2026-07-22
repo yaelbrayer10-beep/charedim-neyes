@@ -19,4 +19,6 @@ node scripts/apply-plugins-and-branding.js
 
 node scripts/configure-email.js
 
+node scripts/add-contact-nav.js
+
 node nodebb build

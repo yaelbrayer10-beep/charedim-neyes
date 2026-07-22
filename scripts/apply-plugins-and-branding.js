@@ -64,8 +64,9 @@ const pluginIds = [
 		title: 'חרדים בלבד',
 		browserTitle: 'חרדים בלבד',
 		'title:short': 'חרדים בלבד',
+		useCompression: 1,
 	});
-	console.log('Site title set to חרדים בלבד');
+	console.log('Site title set to חרדים בלבד, compression enabled');
 
 	console.log('APPLY_DONE');
 	process.exit(0);

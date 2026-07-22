@@ -32,7 +32,6 @@ const pluginIds = [
 	'nodebb-plugin-edit-locked-topics',
 	'nodebb-plugin-emoji-apple',
 	'nodebb-plugin-emoji-extended',
-	'nodebb-plugin-emoji-one',
 	'nodebb-plugin-extended-markdown',
 	'nodebb-plugin-impersonate-users',
 	'nodebb-plugin-moving-topics',

@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: charedim-neyes
+    env: node
+    plan: free
+    region: frankfurt
+    buildCommand: bash render-build.sh
+    startCommand: node app.js
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: NODEBB_SECRET
+        generateValue: true

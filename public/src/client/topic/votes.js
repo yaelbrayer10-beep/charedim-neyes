@@ -1,0 +1,169 @@
+'use strict';
+
+
+define('forum/topic/votes', [
+	'components', 'translator', 'api', 'hooks', 'modals', 'alerts', 'bootstrap', 'benchpress',
+], function (components, translator, api, hooks, modals, alerts, bootstrap, Benchpress) {
+	const Votes = {};
+	let _showTooltip = {};
+
+	Votes.addVoteHandler = function () {
+		_showTooltip = {};
+		if (canSeeUpVotes()) {
+			components.get('topic').on('mouseenter', '[data-pid] [component="post/vote-count"]', loadDataAndCreateTooltip);
+			components.get('topic').on('mouseleave', '[data-pid] [component="post/vote-count"]', destroyTooltip);
+		}
+
+		components.get('topic').on('mouseenter', '[data-pid] [component="post/announce-count"]', loadDataAndCreateTooltip);
+		components.get('topic').on('mouseleave', '[data-pid] [component="post/announce-count"]', destroyTooltip);
+	};
+
+	function canSeeUpVotes() {
+		const { upvoteVisibility, privileges } = ajaxify.data;
+		return privileges.isAdminOrMod ||
+			upvoteVisibility === 'all' ||
+			(upvoteVisibility === 'loggedin' && config.loggedIn);
+	}
+
+	function canSeeVotes() {
+		const { upvoteVisibility, downvoteVisibility, privileges } = ajaxify.data;
+		return privileges.isAdminOrMod ||
+			upvoteVisibility === 'all' || downvoteVisibility === 'all' ||
+			((upvoteVisibility === 'loggedin' || downvoteVisibility === 'loggedin') && config.loggedIn);
+	}
+
+	function destroyTooltip() {
+		const $this = $(this);
+		const pid = $this.parents('[data-pid]').attr('data-pid');
+		const tooltip = bootstrap.Tooltip.getInstance(this);
+		if (tooltip) {
+			tooltip.dispose();
+			$this.attr('title', '');
+		}
+		_showTooltip[pid] = false;
+	}
+
+	function loadDataAndCreateTooltip() {
+		const $this = $(this);
+		const el = $this.parent();
+		const pid = el.parents('[data-pid]').attr('data-pid');
+		_showTooltip[pid] = true;
+		const tooltip = bootstrap.Tooltip.getInstance(this);
+		if (tooltip) {
+			tooltip.dispose();
+			$this.attr('title', '');
+		}
+		const path = $this.attr('component') === 'post/vote-count' ?
+			`/posts/${encodeURIComponent(pid)}/upvoters` :
+			`/posts/${encodeURIComponent(pid)}/announcers/tooltip`;
+
+		api.get(path, {}, function (err, data) {
+			if (err) {
+				return alerts.error(err);
+			}
+			if (_showTooltip[pid] && data) {
+				createTooltip($this, data);
+			}
+		});
+	}
+
+	async function createTooltip(el, data) {
+		function doCreateTooltip(title) {
+			el.attr('title', title);
+			(new bootstrap.Tooltip(el, {
+				container: '#content',
+				html: true,
+			})).show();
+		}
+		const usernames = data.usernames
+			.filter(name => name !== '[[global:former-user]]');
+		if (!usernames.length) {
+			return;
+		}
+		const usersList = usernames.join(', ');
+		if (usernames.length + data.otherCount > data.cutoff) {
+			const translated = await translator.translateKey('topic:users-and-others', [usersList, data.otherCount]);
+			doCreateTooltip(translated);
+		} else {
+			doCreateTooltip(usersList);
+		}
+	}
+
+
+	Votes.toggleVote = function (button, className, delta) {
+		const post = button.closest('[data-pid]');
+		const currentState = post.find(className).length;
+
+		const method = currentState ? 'del' : 'put';
+		const pid = post.attr('data-pid');
+
+		if (!app.user.uid) {
+			let objectId;
+			if (utils.isNumber(pid)) {
+				objectId = config.url + '/post/' + pid;
+			} else {
+				objectId = pid;
+			}
+			import('modules/intents').then(({ trigger }) => {
+				trigger('like', { object: objectId });
+			});
+			return false;
+		}
+
+		api[method](`/posts/${encodeURIComponent(pid)}/vote`, {
+			delta: delta,
+		}, function (err) {
+			if (err) {
+				return alerts.error(err);
+			}
+			hooks.fire('action:post.toggleVote', {
+				pid: pid,
+				delta: delta,
+				unvote: method === 'del',
+			});
+		});
+
+		return false;
+	};
+
+	Votes.showVotes = async function (pid) {
+		if (!canSeeVotes()) {
+			return;
+		}
+		const data = await api.get(`/posts/${encodeURIComponent(pid)}/voters`, {});
+		const html = await Benchpress.render('modals/votes', data);
+		const dialog = await modals.dialog({
+			title: '[[global:voters]]',
+			message: html,
+			className: 'vote-modal',
+			show: true,
+			onEscape: true,
+			backdrop: true,
+		});
+
+		dialog.on('click', function () {
+			dialog.modal('hide');
+		});
+	};
+
+	Votes.showAnnouncers = async function (pid) {
+		const data = await api.get(`/posts/${encodeURIComponent(pid)}/announcers`, {})
+			.catch(err => alerts.error(err));
+
+		const html = await app.parseAndTranslate('modals/announcers', data);
+		const dialog = await modals.dialog({
+			title: `[[topic:announcers-x, ${data.announceCount}]]`,
+			message: html,
+			className: 'announce-modal',
+			show: true,
+			onEscape: true,
+			backdrop: true,
+		});
+
+		dialog.on('click', function () {
+			dialog.modal('hide');
+		});
+	};
+
+	return Votes;
+});

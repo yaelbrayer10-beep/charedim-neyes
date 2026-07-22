@@ -1,0 +1,28 @@
+{
+	"alert.confirm-rebuild-and-restart": "您确定想要重新部署并重启 NodeBB 吗？",
+	"alert.confirm-restart": "您确定要重启 NodeBB 吗？",
+	"rebuilding.title": "Rebuilding... <i class=\"fa fa-spin fa-refresh\"></i>",
+	"rebuilding.message": "NodeBB is rebuilding front-end assets (css, javascript, etc).",
+	"rebuildrestart.success.title": "<i class=\"fa fa-check\"></i> Success",
+	"rebuilding.success.message": "NodeBB has rebuilt and restarted successfully.",
+	"build.complete": "Build Complete!... <i class=\"fa fa-spin fa-refresh\"></i>",
+
+	"restarting.title": "Restarting... <i class=\"fa fa-spin fa-refresh\"></i>",
+	"restarting.message": "NodeBB is restarting.",
+	"restarting.success.message": "NodeBB has restarted successfully.",
+
+
+	"acp-title": "%1 | NodeBB 管理员控制面板",
+	"settings-header-contents": "内容",
+	"changes-saved": "更改已保存",
+	"changes-saved-message": "你对 NodeBB 配置文件的更改已经保存。",
+	"changes-not-saved": "更改未保存",
+	"changes-not-saved-message": "NodeBB 在保存您的更改时遇到了问题。 (%1)",
+	"save-changes": "保存更改",
+	"min": "最小：",
+	"max": "最大：",
+	"view": "浏览",
+	"edit": "编辑",
+	"add": "添加",
+	"select-icon": "选择图标"
+}

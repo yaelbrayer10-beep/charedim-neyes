@@ -162,7 +162,10 @@ Interstitials.gdpr = async function (data) {
 			digestEnabled: meta.config.dailyDigestFreq !== 'off',
 		},
 		callback: function (userData, formData, next) {
-			if (formData.gdpr_agree_data === 'on' && formData.gdpr_agree_email === 'on') {
+			// Data-processing consent is required to use the site at all;
+			// email consent is a separate, optional preference and must
+			// not block registration on its own.
+			if (formData.gdpr_agree_data === 'on') {
 				userData.gdpr_consent = true;
 			}
 

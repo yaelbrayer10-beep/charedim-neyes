@@ -6,6 +6,10 @@ require('./nodebb-global');
 const nconf = require('nconf');
 nconf.argv().env({ separator: '__' });
 
+const { paths } = require('./src/constants');
+const prestart = require('./src/prestart');
+prestart.loadConfig(paths.config);
+
 nconf.set('database', 'mongo');
 nconf.set('mongo:uri', process.env.MONGO_URI);
 if (!nconf.get('url')) {

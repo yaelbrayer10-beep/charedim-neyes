@@ -26,7 +26,6 @@ const pluginIds = [
 	'nodebb-plugin-announcements',
 	'nodebb-plugin-cards',
 	'nodebb-plugin-chat-search',
-	'nodebb-plugin-colors',
 	'nodebb-plugin-custom-notify',
 	'nodebb-plugin-custom-pages',
 	'nodebb-plugin-edit-locked-topics',
